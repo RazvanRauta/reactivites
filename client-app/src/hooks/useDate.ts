@@ -1,13 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosError, Method } from 'axios'
 import { useEffect, useState } from 'react'
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
 
-const useData = <T>(
-  url: string,
-  method: Method,
-  body?: any
-): [boolean, string | null, T | null] => {
+const useData = <T>(url: string, method: Method, body?: unknown) => {
   const [loading, setLoading] = useState<boolean>(false)
   const [data, setData] = useState<T | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -28,7 +25,7 @@ const useData = <T>(
         if (!ignore) {
           setData(dataObj)
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorObj = err as Error | AxiosError<{ error: any }>
 
         if (axios.isAxiosError(errorObj)) {
@@ -58,7 +55,7 @@ const useData = <T>(
     }
   }, [url])
 
-  return [loading, error, data]
+  return { loading, error, data }
 }
 
 export default useData

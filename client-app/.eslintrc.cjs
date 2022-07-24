@@ -4,9 +4,12 @@ module.exports = {
     es2021: true,
   },
   extends: [
+    'eslint:recommended',
     'plugin:react/recommended',
     'airbnb',
     'plugin:jsx-a11y/recommended',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
   ],
   parser: '@typescript-eslint/parser',
@@ -49,6 +52,17 @@ module.exports = {
       },
     ],
     'no-console': ['error', { allow: ['error'] }],
+    'no-shadow': 'off',
+    '@typescript-eslint/no-shadow': 'error',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+      },
+    ],
     'jsx-a11y/anchor-is-valid': [
       'error',
       {
