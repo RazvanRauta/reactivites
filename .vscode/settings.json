@@ -7,5 +7,6 @@
   "prettier.configPath": "client-app/.prettierrc.cjs",
   "eslint.packageManager": "yarn",
   "eslint.run": "onSave",
-  "eslint.workingDirectories": ["client-app"]
+  "eslint.workingDirectories": ["client-app"],
+  "cSpell.words": ["Mediat"]
 }
