@@ -28,6 +28,7 @@ module.exports = {
       node: {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       },
+      typescript: {},
     },
   },
   plugins: ['react', '@typescript-eslint', 'simple-import-sort', 'prettier'],
