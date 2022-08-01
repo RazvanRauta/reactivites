@@ -1,6 +1,7 @@
-import { Container, List } from 'semantic-ui-react'
+import { Container } from 'semantic-ui-react'
 
 import { ActivitiesResponseType } from '@/@types'
+import ActivityDashboard from '@/features/activities/dashboard/ActivityDashboard'
 import useData from '@/hooks/useData'
 
 import NavBar from './NavBar'
@@ -21,11 +22,7 @@ function App() {
       <>
         <NavBar />
         <Container style={{ marginTop: '7em' }}>
-          <List>
-            {data.map((activity) => (
-              <List.Item key={activity.id}>{activity.title}</List.Item>
-            ))}
-          </List>
+          <ActivityDashboard activities={data} />
         </Container>
       </>
     )
