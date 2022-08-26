@@ -1,13 +1,28 @@
+import { useEffect } from 'react'
 import { Container } from 'semantic-ui-react'
 
 import { ActivitiesResponseType } from '@/@types'
 import ActivityDashboard from '@/features/activities/dashboard/ActivityDashboard'
-import useData from '@/hooks/useData'
+import useRequest from '@/hooks/useRequest'
 
 import NavBar from './NavBar'
 
 function App() {
-  const { data, loading, error } = useData<ActivitiesResponseType>('/activities', 'GET')
+  const { data, loading, error, doRequest } = useRequest<ActivitiesResponseType>({
+    url: '/activities',
+    method: 'GET',
+  })
+
+  useEffect(() => {
+    let ignore = false
+    if (!ignore) {
+      doRequest()
+    }
+
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   if (loading) {
     return <div>Loading...</div>
@@ -22,7 +37,7 @@ function App() {
       <>
         <NavBar />
         <Container style={{ marginTop: '7em' }}>
-          <ActivityDashboard activities={data} />
+          <ActivityDashboard activities={data} refreshData={doRequest} />
         </Container>
       </>
     )

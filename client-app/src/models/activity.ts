@@ -1,4 +1,4 @@
-export interface IActivity {
+export type IActivity = {
   id: string
   title: string
   date: Date

@@ -1,29 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosError, Method } from 'axios'
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
 
-const useData = <T>(url: string, method: Method, body?: unknown) => {
+interface UseDataProps<T> {
+  url: string
+  method: Method
+  onSuccess?: (val: T | null) => void
+  body?: any
+}
+
+export type DoRequestType<T = Record<string, unknown>> = (props?: T) => Promise<void>
+
+const useRequest = <T>({ url, method, onSuccess, body = {} }: UseDataProps<T>) => {
   const [loading, setLoading] = useState<boolean>(false)
   const [data, setData] = useState<T | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    let ignore = false
-    setLoading(true)
-    const controller = new AbortController()
-    const fetchData = async () => {
+  const doRequest: DoRequestType = useCallback(
+    async (props = {}) => {
+      setLoading(true)
       try {
         const response = await axios({
           url,
           method,
-          data: body,
-          signal: controller.signal,
+          data: { ...body, ...props },
         })
         const dataObj = response?.data
-        if (!ignore) {
-          setData(dataObj)
+        setData(dataObj)
+        if (onSuccess) {
+          onSuccess(dataObj)
         }
       } catch (err: unknown) {
         const errorObj = err as Error | AxiosError<{ error: any }>
@@ -32,30 +39,20 @@ const useData = <T>(url: string, method: Method, body?: unknown) => {
           if (errorObj.code === AxiosError.ERR_CANCELED) {
             return
           }
-          if (!ignore) {
-            setError(errorObj?.response?.data?.error?.message || errorObj.message)
-          }
-        } else if (!ignore) {
+          setError(errorObj?.response?.data?.error?.message || errorObj.message)
+        } else {
           setError(errorObj.message)
         }
 
         console.error(errorObj)
       } finally {
-        if (!ignore) {
-          setLoading(false)
-        }
+        setLoading(false)
       }
-    }
+    },
+    [url, method, body, onSuccess]
+  )
 
-    fetchData().then((r) => r)
-
-    return () => {
-      ignore = true
-      controller.abort()
-    }
-  }, [url])
-
-  return { loading, error, data }
+  return { loading, error, data, doRequest }
 }
 
-export default useData
+export default useRequest

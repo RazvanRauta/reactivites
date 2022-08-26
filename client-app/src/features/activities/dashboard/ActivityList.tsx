@@ -1,15 +1,18 @@
 import format from 'date-fns/format'
-import { Dispatch, SetStateAction } from 'react'
+import { memo } from 'react'
 import { Button, Item, Label, Segment } from 'semantic-ui-react'
 
 import { IActivity } from '@/models/activity'
 
 interface IActivityListProps {
   activities: ReadonlyArray<IActivity>
-  setActivity: Dispatch<SetStateAction<IActivity | null>>
+  setActivity: (act: IActivity) => void
 }
 
-export default function ActivityList({ activities, setActivity }: IActivityListProps) {
+export default memo(function ActivityList({
+  activities,
+  setActivity,
+}: IActivityListProps) {
   return (
     <Segment>
       <Item.Group divided>
@@ -39,4 +42,4 @@ export default function ActivityList({ activities, setActivity }: IActivityListP
       </Item.Group>
     </Segment>
   )
-}
+})
