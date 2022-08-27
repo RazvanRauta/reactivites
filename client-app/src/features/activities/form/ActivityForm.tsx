@@ -1,5 +1,6 @@
-import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, memo, useCallback, useEffect, useState } from 'react'
 import { Button, Form, Segment } from 'semantic-ui-react'
+import { v4 as uuid } from 'uuid'
 
 import { FunctionWithoutArgs } from '@/@types'
 import useRequest, { DoRequestType } from '@/hooks/useRequest'
@@ -16,74 +17,100 @@ interface ValueData {
   value?: string | Date | number
 }
 
-export default function ActivityForm({
+export default memo(function ActivityForm({
   cancelEdit,
   editedActivity,
   refreshData,
 }: ActivityFormProps) {
-  const [updatedActivity, setUpdatedActivity] = useState<IActivity | null>(editedActivity)
-  const { loading, error, doRequest } = useRequest<void>({
-    url: `/activities/${updatedActivity?.id}`,
+  const initialState = editedActivity ?? {
+    id: '',
+    title: '',
+    category: '',
+    city: '',
+    date: '',
+    description: '',
+    venue: '',
+  }
+
+  const [activity, setActivity] = useState<IActivity>(initialState)
+  const {
+    loading: updatingActivity,
+    error: updateActivityError,
+    doRequest: updateActivity,
+  } = useRequest<void>({
+    url: `/activities/${activity?.id}`,
     method: 'PUT',
     onSuccess: () => refreshData(),
   })
 
+  const {
+    loading: creatingActivity,
+    error: createActivityError,
+    doRequest: createActivity,
+  } = useRequest<void>({
+    url: `/activities`,
+    method: 'POST',
+    onSuccess: () => refreshData(),
+  })
+
   useEffect(() => {
-    setUpdatedActivity(editedActivity)
+    setActivity(initialState)
   }, [editedActivity])
 
   const handleChange = (
     _event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     { name, value }: ValueData
   ) => {
-    if (name && updatedActivity) {
-      setUpdatedActivity({ ...updatedActivity, [name]: value })
+    if (name) {
+      setActivity({ ...activity, [name]: value })
     }
   }
 
   const handleSubmit = useCallback(() => {
-    if (updatedActivity) {
-      doRequest(updatedActivity)
+    if (activity?.id) {
+      updateActivity(activity)
+    } else {
+      createActivity({ ...activity, id: uuid() })
     }
-  }, [updatedActivity])
+  }, [activity])
 
   return (
     <Segment clearing>
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={handleSubmit} autoComplete="off">
         <Form.Input
           placeholder="Title"
           name="title"
-          value={updatedActivity?.title}
+          value={activity?.title}
           onChange={handleChange}
         />
         <Form.TextArea
           placeholder="Description"
           name="description"
-          value={updatedActivity?.description}
+          value={activity?.description}
           onChange={handleChange}
         />
         <Form.Input
           placeholder="Category"
           name="category"
-          value={updatedActivity?.category}
+          value={activity?.category}
           onChange={handleChange}
         />
         <Form.Input
           placeholder="Date"
           name="date"
-          value={updatedActivity?.date}
+          value={activity?.date}
           onChange={handleChange}
         />
         <Form.Input
           placeholder="City"
           name="city"
-          value={updatedActivity?.city}
+          value={activity?.city}
           onChange={handleChange}
         />
         <Form.Input
           placeholder="Venue"
           name="venue"
-          value={updatedActivity?.venue}
+          value={activity?.venue}
           onChange={handleChange}
         />
 
@@ -92,12 +119,13 @@ export default function ActivityForm({
           positive
           type="submit"
           content="Submit"
-          disabled={loading}
+          disabled={updatingActivity || creatingActivity}
         />
         <Button floated="right" type="button" content="Cancel" onClick={cancelEdit} />
       </Form>
 
-      {Boolean(error) && <div>Error: {error}</div>}
+      {Boolean(updateActivityError) && <div>Error: {updateActivityError}</div>}
+      {Boolean(createActivityError) && <div>Error: {createActivityError}</div>}
     </Segment>
   )
-}
+})

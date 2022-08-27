@@ -7,11 +7,13 @@ import { IActivity } from '@/models/activity'
 interface IActivityListProps {
   activities: ReadonlyArray<IActivity>
   setActivity: (act: IActivity) => void
+  deleteActivity: (id: string) => void
 }
 
 export default memo(function ActivityList({
   activities,
   setActivity,
+  deleteActivity,
 }: IActivityListProps) {
   return (
     <Segment>
@@ -33,6 +35,12 @@ export default memo(function ActivityList({
                   content="View"
                   color="blue"
                   onClick={() => setActivity(activity)}
+                />
+                <Button
+                  floated="right"
+                  content="Delete"
+                  color="red"
+                  onClick={() => deleteActivity(activity.id)}
                 />
                 <Label basic content={activity.category} />
               </Item.Extra>

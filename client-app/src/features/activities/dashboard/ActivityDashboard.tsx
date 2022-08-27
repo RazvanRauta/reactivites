@@ -37,10 +37,18 @@ export default memo(function ActivityDashboard({
     setEditMode(false)
   }, [])
 
+  const handleDeleteActivity = useCallback((_id: string) => {
+    // handle delete
+  }, [])
+
   return (
     <Grid>
       <Grid.Column width="10">
-        <ActivityList activities={activities} setActivity={handleSelectActivity} />
+        <ActivityList
+          activities={activities}
+          setActivity={handleSelectActivity}
+          deleteActivity={handleDeleteActivity}
+        />
       </Grid.Column>
       <Grid.Column width="6">
         {selectedActivity && (
