@@ -1,4 +1,4 @@
-export type IActivity = {
+export type Activity = {
   id: string
   title: string
   date: string

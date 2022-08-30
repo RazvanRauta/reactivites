@@ -1,5 +1,5 @@
-import { IActivity } from '@/models/activity'
+import { Activity } from '@/models/activity'
 
-export type ActivitiesResponseType = ReadonlyArray<IActivity>
+export type ActivitiesResponseType = ReadonlyArray<Activity>
 
 export type FunctionWithoutArgs<T> = () => T

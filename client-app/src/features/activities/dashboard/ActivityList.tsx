@@ -1,20 +1,32 @@
 import format from 'date-fns/format'
-import { memo } from 'react'
+import { memo, SyntheticEvent, useCallback, useState } from 'react'
 import { Button, Item, Label, Segment } from 'semantic-ui-react'
 
-import { IActivity } from '@/models/activity'
+import { Activity } from '@/models/activity'
 
 interface IActivityListProps {
-  activities: ReadonlyArray<IActivity>
-  setActivity: (act: IActivity) => void
+  activities: Activity[]
+  selectActivity: (id: string) => void
   deleteActivity: (id: string) => void
+  submitting: boolean
 }
 
 export default memo(function ActivityList({
   activities,
-  setActivity,
+  selectActivity,
   deleteActivity,
+  submitting,
 }: IActivityListProps) {
+  const [target, setTarget] = useState('')
+
+  const handleActivityDelete = useCallback(
+    (e: SyntheticEvent<HTMLButtonElement>, id: string) => {
+      setTarget(e.currentTarget.name)
+      deleteActivity(id)
+    },
+    []
+  )
+
   return (
     <Segment>
       <Item.Group divided>
@@ -31,16 +43,18 @@ export default memo(function ActivityList({
               </Item.Description>
               <Item.Extra>
                 <Button
+                  onClick={() => selectActivity(activity.id)}
                   floated="right"
                   content="View"
                   color="blue"
-                  onClick={() => setActivity(activity)}
                 />
                 <Button
+                  name={activity.id}
+                  loading={submitting && target === activity.id}
+                  onClick={(e) => handleActivityDelete(e, activity.id)}
                   floated="right"
                   content="Delete"
                   color="red"
-                  onClick={() => deleteActivity(activity.id)}
                 />
                 <Label basic content={activity.category} />
               </Item.Extra>

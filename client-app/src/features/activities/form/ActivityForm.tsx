@@ -1,78 +1,54 @@
 import { ChangeEvent, memo, useCallback, useEffect, useState } from 'react'
 import { Button, Form, Segment } from 'semantic-ui-react'
-import { v4 as uuid } from 'uuid'
 
-import { FunctionWithoutArgs } from '@/@types'
-import useRequest, { DoRequestType } from '@/hooks/useRequest'
-import { IActivity } from '@/models/activity'
+import { Activity } from '@/models/activity'
 
 interface ActivityFormProps {
-  cancelEdit: FunctionWithoutArgs<void>
-  editedActivity: IActivity | null
-  refreshData: DoRequestType
-}
-
-interface ValueData {
-  name?: keyof IActivity
-  value?: string | Date | number
+  activity: Activity | undefined
+  closeForm: () => void
+  createOrEdit: (activity: Activity) => void
+  submitting: boolean
 }
 
 export default memo(function ActivityForm({
-  cancelEdit,
-  editedActivity,
-  refreshData,
+  activity: selectedActivity,
+  closeForm,
+  createOrEdit,
+  submitting,
 }: ActivityFormProps) {
-  const initialState = editedActivity ?? {
+  const initialState = {
     id: '',
     title: '',
     category: '',
-    city: '',
-    date: '',
     description: '',
+    date: '',
+    city: '',
     venue: '',
   }
 
-  const [activity, setActivity] = useState<IActivity>(initialState)
-  const {
-    loading: updatingActivity,
-    error: updateActivityError,
-    doRequest: updateActivity,
-  } = useRequest<void>({
-    url: `/activities/${activity?.id}`,
-    method: 'PUT',
-    onSuccess: () => refreshData(),
-  })
-
-  const {
-    loading: creatingActivity,
-    error: createActivityError,
-    doRequest: createActivity,
-  } = useRequest<void>({
-    url: `/activities`,
-    method: 'POST',
-    onSuccess: () => refreshData(),
-  })
-
-  useEffect(() => {
-    setActivity(initialState)
-  }, [editedActivity])
-
-  const handleChange = (
-    _event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    { name, value }: ValueData
-  ) => {
-    if (name) {
-      setActivity({ ...activity, [name]: value })
-    }
-  }
+  const [activity, setActivity] = useState(initialState)
 
   const handleSubmit = useCallback(() => {
-    if (activity?.id) {
-      updateActivity(activity)
-    } else {
-      createActivity({ ...activity, id: uuid() })
-    }
+    createOrEdit(activity)
   }, [activity])
+
+  const handleChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = event.target
+      setActivity({ ...activity, [name]: value })
+    },
+    [activity]
+  )
+
+  useEffect(() => {
+    let ignore = false
+
+    if (!ignore) setActivity(selectedActivity ?? initialState)
+
+    return () => {
+      ignore = true
+    }
+  }, [selectedActivity])
 
   return (
     <Segment clearing>
@@ -98,6 +74,7 @@ export default memo(function ActivityForm({
         <Form.Input
           placeholder="Date"
           name="date"
+          type="date"
           value={activity?.date}
           onChange={handleChange}
         />
@@ -115,17 +92,14 @@ export default memo(function ActivityForm({
         />
 
         <Button
+          loading={submitting}
           floated="right"
           positive
           type="submit"
           content="Submit"
-          disabled={updatingActivity || creatingActivity}
         />
-        <Button floated="right" type="button" content="Cancel" onClick={cancelEdit} />
+        <Button onClick={closeForm} floated="right" type="button" content="Cancel" />
       </Form>
-
-      {Boolean(updateActivityError) && <div>Error: {updateActivityError}</div>}
-      {Boolean(createActivityError) && <div>Error: {createActivityError}</div>}
     </Segment>
   )
 })

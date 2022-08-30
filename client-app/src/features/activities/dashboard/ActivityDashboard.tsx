@@ -1,68 +1,64 @@
-import { memo, useCallback, useState } from 'react'
+import axios from 'axios'
+import { memo } from 'react'
 import { Grid } from 'semantic-ui-react'
 
-import { DoRequestType } from '@/hooks/useRequest'
-import { IActivity } from '@/models/activity'
+import { Activity } from '@/models/activity'
 
 import ActivityDetails from '../details/ActivityDetails'
 import ActivityForm from '../form/ActivityForm'
 import ActivityList from './ActivityList'
 
-interface IActivityDashboardProps {
-  activities: ReadonlyArray<IActivity>
-  refreshData: DoRequestType
+type ActivityDashboardProps = {
+  activities: Activity[]
+  selectedActivity: Activity | undefined
+  selectActivity: (id: string) => void
+  cancelSelectActivity: () => void
+  editMode: boolean
+  openForm: (id: string) => void
+  closeForm: () => void
+  createOrEdit: (activity: Activity) => void
+  deleteActivity: (id: string) => void
+  submitting: boolean
 }
+
+axios.defaults.baseURL = import.meta.env.VITE_API_URL
 
 export default memo(function ActivityDashboard({
   activities,
-  refreshData,
-}: IActivityDashboardProps) {
-  const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(null)
-  const [editMode, setEditMode] = useState<boolean>(false)
-
-  const handleSelectActivity = useCallback((newSelectedActivity: IActivity) => {
-    setSelectedActivity(newSelectedActivity)
-  }, [])
-
-  const handleEnableEditMode = useCallback(() => {
-    setEditMode(true)
-  }, [])
-
-  const handleCancelEditMode = useCallback(() => {
-    setEditMode(false)
-  }, [])
-
-  const handleCancelSelectActivity = useCallback(() => {
-    setSelectedActivity(null)
-    setEditMode(false)
-  }, [])
-
-  const handleDeleteActivity = useCallback((_id: string) => {
-    // handle delete
-  }, [])
-
+  selectedActivity,
+  deleteActivity,
+  selectActivity,
+  cancelSelectActivity,
+  editMode,
+  openForm,
+  closeForm,
+  createOrEdit,
+  submitting,
+}: ActivityDashboardProps) {
   return (
     <Grid>
       <Grid.Column width="10">
         <ActivityList
           activities={activities}
-          setActivity={handleSelectActivity}
-          deleteActivity={handleDeleteActivity}
+          selectActivity={selectActivity}
+          deleteActivity={deleteActivity}
+          submitting={submitting}
         />
       </Grid.Column>
       <Grid.Column width="6">
-        {selectedActivity && (
+        {selectedActivity && !editMode && (
           <ActivityDetails
-            selectedActivity={selectedActivity}
-            cancelSetActivity={handleCancelSelectActivity}
-            enableEditMode={handleEnableEditMode}
+            activity={selectedActivity}
+            cancelSelectActivity={cancelSelectActivity}
+            openForm={openForm}
           />
         )}
         {editMode && (
           <ActivityForm
-            editedActivity={selectedActivity}
-            cancelEdit={handleCancelEditMode}
-            refreshData={refreshData}
+            closeForm={closeForm}
+            activity={selectedActivity}
+            createOrEdit={createOrEdit}
+            submitting={submitting}
           />
         )}
       </Grid.Column>
