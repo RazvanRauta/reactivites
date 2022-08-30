@@ -20,23 +20,30 @@ axios.interceptors.response.use(async (response) => {
   }
 })
 
-const responseBody = <T>(response: AxiosResponse<T>) => response.data
+const responseBody = <T>(response: AxiosResponse<T>) => response?.data
 
 const requests = {
-  get: <T>(url: string) => axios.get<T>(url).then(responseBody),
-  post: <T>(url: string, body: Record<string, unknown>) =>
-    axios.post<T>(url, body).then(responseBody),
-  put: <T>(url: string, body: Record<string, unknown>) =>
-    axios.put<T>(url, body).then(responseBody),
-  del: <T>(url: string) => axios.delete<T>(url).then(responseBody),
+  get: <T>(url: string, abortSignal?: AbortSignal) =>
+    axios.get<T>(url, { signal: abortSignal }).then(responseBody),
+  post: <T>(url: string, body: Record<string, unknown>, abortSignal?: AbortSignal) =>
+    axios.post<T>(url, body, { signal: abortSignal }).then(responseBody),
+  put: <T>(url: string, body: Record<string, unknown>, abortSignal?: AbortSignal) =>
+    axios.put<T>(url, body, { signal: abortSignal }).then(responseBody),
+  del: <T>(url: string, abortSignal?: AbortSignal) =>
+    axios.delete<T>(url, { signal: abortSignal }).then(responseBody),
 }
 
 const Activities = {
-  list: () => requests.get<Activity[]>('/activities'),
-  details: (id: string) => requests.get<Activity>(`/activities/${id}`),
-  create: (activity: Activity) => axios.post<void>('/activities', activity),
-  update: (activity: Activity) => axios.put<void>(`/activities/${activity.id}`, activity),
-  delete: (id: string) => axios.delete<void>(`/activities/${id}`),
+  list: (abortSignal?: AbortSignal) =>
+    requests.get<Activity[]>('/activities', abortSignal),
+  details: (id: string, abortSignal?: AbortSignal) =>
+    requests.get<Activity>(`/activities/${id}`, abortSignal),
+  create: (activity: Activity, abortSignal?: AbortSignal) =>
+    requests.post<void>('/activities', activity, abortSignal),
+  update: (activity: Activity, abortSignal?: AbortSignal) =>
+    requests.put<void>(`/activities/${activity.id}`, activity, abortSignal),
+  delete: (id: string, abortSignal?: AbortSignal) =>
+    requests.del<void>(`/activities/${id}`, abortSignal),
 }
 
 const api = {

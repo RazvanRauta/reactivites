@@ -1,21 +1,10 @@
-import { ChangeEvent, memo, useCallback, useEffect, useState } from 'react'
+import { observer } from 'mobx-react-lite'
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { Button, Form, Segment } from 'semantic-ui-react'
 
-import { Activity } from '@/models/activity'
+import { useStore } from '@/app/stores'
 
-interface ActivityFormProps {
-  activity: Activity | undefined
-  closeForm: () => void
-  createOrEdit: (activity: Activity) => void
-  submitting: boolean
-}
-
-export default memo(function ActivityForm({
-  activity: selectedActivity,
-  closeForm,
-  createOrEdit,
-  submitting,
-}: ActivityFormProps) {
+export default observer(function ActivityForm() {
   const initialState = {
     id: '',
     title: '',
@@ -26,10 +15,24 @@ export default memo(function ActivityForm({
     venue: '',
   }
 
+  const {
+    activityStore: {
+      selectedActivity,
+      closeForm,
+      updateActivity,
+      createActivity,
+      loading,
+    },
+  } = useStore()
+
   const [activity, setActivity] = useState(initialState)
 
   const handleSubmit = useCallback(() => {
-    createOrEdit(activity)
+    if (activity.id) {
+      updateActivity(activity)
+    } else {
+      createActivity(activity)
+    }
   }, [activity])
 
   const handleChange = useCallback(
@@ -92,7 +95,7 @@ export default memo(function ActivityForm({
         />
 
         <Button
-          loading={submitting}
+          loading={loading}
           floated="right"
           positive
           type="submit"

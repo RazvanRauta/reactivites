@@ -1,11 +1,12 @@
 import { memo } from 'react'
 import { Button, Container, Menu } from 'semantic-ui-react'
 
-type NavBarProps = {
-  openForm: () => void
-}
+import { useStore } from '../stores'
 
-export default memo(function NavBar({ openForm }: NavBarProps) {
+export default memo(function NavBar() {
+  const {
+    activityStore: { openForm },
+  } = useStore()
   return (
     <Menu inverted fixed="top">
       <Container>
@@ -15,7 +16,7 @@ export default memo(function NavBar({ openForm }: NavBarProps) {
         </Menu.Item>
         <Menu.Item name="Activities" />
         <Menu.Item>
-          <Button onClick={openForm} positive content="Create Activity" />
+          <Button onClick={() => openForm()} positive content="Create Activity" />
         </Menu.Item>
       </Container>
     </Menu>
