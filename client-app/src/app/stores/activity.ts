@@ -2,8 +2,8 @@ import { AxiosError } from 'axios'
 import { makeAutoObservable, runInAction } from 'mobx'
 import { v4 as uuid } from 'uuid'
 
-import api from '@/api'
-import { Activity } from '@/models/activity'
+import api from '@/app/api'
+import { Activity } from '@/app/models/activity'
 
 export default class ActivityStore {
   activityRegistry = new Map<string, Activity>()
@@ -28,11 +28,8 @@ export default class ActivityStore {
     )
   }
 
-  setLoadingInitial = (state: boolean) => {
-    this.loadingInitial = state
-  }
-
   loadActivities = async (abortSignal: AbortSignal) => {
+    this.loadingInitial = true
     try {
       const response = await api.Activities.list(abortSignal)
 
@@ -43,12 +40,14 @@ export default class ActivityStore {
             date: activity.date.split('T')[0],
           })
         })
+        this.loadingInitial = false
       })
     } catch (err) {
       const error = err as AxiosError
       if (error.code !== 'ERR_CANCELED') console.error(err)
-    } finally {
-      this.setLoadingInitial(false)
+      runInAction(() => {
+        this.loadingInitial = false
+      })
     }
   }
 

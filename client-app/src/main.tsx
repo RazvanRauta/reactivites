@@ -3,6 +3,7 @@ import './app/layout/styles.css'
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
 
 import App from './app/layout/App'
 import { store, StoreContext } from './app/stores'
@@ -10,7 +11,9 @@ import { store, StoreContext } from './app/stores'
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <StoreContext.Provider value={store}>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </StoreContext.Provider>
   </React.StrictMode>
 )

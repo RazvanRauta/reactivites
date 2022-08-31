@@ -1,41 +1,23 @@
-import { observer } from 'mobx-react-lite'
-import { useEffect } from 'react'
-import { Container } from 'semantic-ui-react'
+import { memo } from 'react'
+import { Route, Routes } from 'react-router-dom'
 
 import ActivityDashboard from '@/features/activities/dashboard/ActivityDashboard'
+import ActivityForm from '@/features/activities/form/ActivityForm'
+import HomePage from '@/features/home/HomePage'
 
-import { useStore } from '../stores'
-import Loader from './Loader'
-import NavBar from './NavBar'
+import Layout from './Layout'
 
 function App() {
-  const {
-    activityStore: { loadActivities, loadingInitial },
-  } = useStore()
-
-  useEffect(() => {
-    let ignore = false
-    const controller = new AbortController()
-    if (!ignore) loadActivities(controller.signal)
-
-    return () => {
-      ignore = true
-      controller.abort()
-    }
-  }, [loadActivities])
-
-  if (loadingInitial) {
-    return <Loader content="Loading app" />
-  }
-
   return (
-    <>
-      <NavBar />
-      <Container style={{ marginTop: '7em' }}>
-        <ActivityDashboard />
-      </Container>
-    </>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="activities" element={<ActivityDashboard />} />
+        <Route path="createActivity" element={<ActivityForm />} />
+        <Route path="*" element={<p>There&apos;s nothing here: 404!</p>} />
+      </Route>
+    </Routes>
   )
 }
 
-export default observer(App)
+export default memo(App)
