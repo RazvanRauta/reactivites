@@ -1,6 +1,5 @@
 import { AxiosError } from 'axios'
 import { makeAutoObservable, runInAction } from 'mobx'
-import { v4 as uuid } from 'uuid'
 
 import api from '@/app/api'
 import { Activity } from '@/app/models/activity'
@@ -14,7 +13,7 @@ export default class ActivityStore {
 
   loading = false
 
-  loadingInitial = true
+  loadingInitial = false
 
   submitting = false
 
@@ -35,10 +34,7 @@ export default class ActivityStore {
 
       runInAction(() => {
         response?.forEach((activity) => {
-          this.activityRegistry.set(activity.id, {
-            ...activity,
-            date: activity.date.split('T')[0],
-          })
+          this.setActivity(activity)
         })
         this.loadingInitial = false
       })
@@ -51,34 +47,55 @@ export default class ActivityStore {
     }
   }
 
-  selectActivity = (id: string) => {
-    this.selectedActivity = this.activityRegistry.get(id)
+  loadActivity = async (id: string, abortSignal?: AbortSignal) => {
+    let activity = this.getActivity(id)
+
+    if (activity) {
+      this.selectedActivity = activity
+    } else {
+      this.loadingInitial = true
+
+      try {
+        activity = await api.Activities.details(id, abortSignal)
+        runInAction(() => {
+          if (activity) {
+            activity = this.setActivity(activity)
+            this.selectedActivity = activity
+          }
+          this.loadingInitial = false
+        })
+      } catch (error) {
+        console.error(error)
+        runInAction(() => {
+          this.loadingInitial = false
+        })
+      }
+    }
+    return activity
   }
 
-  cancelSelectedActivity = () => {
-    this.selectedActivity = undefined
+  private getActivity = (id: string) => {
+    return this.activityRegistry.get(id)
   }
 
-  openForm = (id?: string) => {
-    // eslint-disable-next-line no-unused-expressions
-    id ? this.selectActivity(id) : this.cancelSelectedActivity()
-    this.editMode = true
-  }
+  private setActivity = (activity: Activity) => {
+    const formattedActivity = {
+      ...activity,
+      date: activity.date.split('T')[0],
+    }
+    this.activityRegistry.set(activity.id, formattedActivity)
 
-  closeForm = () => {
-    this.editMode = false
+    return formattedActivity
   }
 
   createActivity = async (activity: Activity) => {
     this.loading = true
 
-    const newActivity = { ...activity, id: uuid() }
-
     try {
-      await api.Activities.create(newActivity)
+      await api.Activities.create(activity)
       runInAction(() => {
-        this.activityRegistry.set(newActivity.id, newActivity)
-        this.selectedActivity = newActivity
+        this.activityRegistry.set(activity.id, activity)
+        this.selectedActivity = activity
         this.editMode = false
       })
     } catch (error) {
@@ -116,9 +133,6 @@ export default class ActivityStore {
       await api.Activities.delete(id)
       runInAction(() => {
         this.activityRegistry.delete(id)
-        if (this.selectedActivity?.id === id) {
-          this.cancelSelectedActivity()
-        }
       })
     } catch (error) {
       console.error(error)

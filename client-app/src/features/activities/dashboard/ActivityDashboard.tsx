@@ -6,8 +6,6 @@ import { Grid } from 'semantic-ui-react'
 import Loader from '@/app/layout/Loader'
 import { useStore } from '@/app/stores'
 
-import ActivityDetails from '../details/ActivityDetails'
-import ActivityForm from '../form/ActivityForm'
 import ActivityList from './ActivityList'
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
@@ -15,14 +13,16 @@ axios.defaults.baseURL = import.meta.env.VITE_API_URL
 export default observer(function ActivityDashboard() {
   const { activityStore } = useStore()
 
+  const { loadActivities, activityRegistry } = activityStore
+
   useEffect(() => {
     const controller = new AbortController()
-    activityStore.loadActivities(controller.signal)
+    if (activityRegistry.size <= 1) loadActivities(controller.signal)
 
     return () => {
       controller.abort()
     }
-  }, [activityStore])
+  }, [activityRegistry.size, loadActivities])
 
   if (activityStore.loadingInitial) {
     return <Loader content="Loading app" />
@@ -34,8 +34,7 @@ export default observer(function ActivityDashboard() {
         <ActivityList />
       </Grid.Column>
       <Grid.Column width="6">
-        {activityStore.selectedActivity && !activityStore.editMode && <ActivityDetails />}
-        {activityStore.editMode && <ActivityForm />}
+        <h2>Activity Filters</h2>
       </Grid.Column>
     </Grid>
   )
