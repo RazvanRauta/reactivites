@@ -27,6 +27,17 @@ export default class ActivityStore {
     )
   }
 
+  get groupedActivities() {
+    return Object.entries(
+      this.activitiesByDate.reduce((activities, activity) => {
+        const { date } = activity
+        // eslint-disable-next-line no-param-reassign
+        activities[date] = activities[date] ? [...activities[date], activity] : [activity]
+        return activities
+      }, {} as Record<string, Activity[]>)
+    )
+  }
+
   loadActivities = async (abortSignal: AbortSignal) => {
     this.loadingInitial = true
     try {
