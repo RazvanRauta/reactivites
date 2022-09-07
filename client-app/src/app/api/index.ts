@@ -2,8 +2,8 @@ import axios, { AxiosResponse } from 'axios'
 
 import { Activity } from '@/app/models/activity'
 
-const sleep = (delay: number) => {
-  return new Promise((resolve) => {
+const sleep = async (delay: number) => {
+  return await new Promise((resolve) => {
     setTimeout(resolve, delay)
   })
 }
@@ -16,34 +16,37 @@ axios.interceptors.response.use(async (response) => {
     return response
   } catch (error) {
     console.error(error)
-    return Promise.reject(error)
+    return await Promise.reject(error)
   }
 })
 
 const responseBody = <T>(response: AxiosResponse<T>) => response?.data
 
 const requests = {
-  get: <T>(url: string, abortSignal?: AbortSignal) =>
-    axios.get<T>(url, { signal: abortSignal }).then(responseBody),
-  post: <T>(url: string, body: Record<string, unknown>, abortSignal?: AbortSignal) =>
-    axios.post<T>(url, body, { signal: abortSignal }).then(responseBody),
-  put: <T>(url: string, body: Record<string, unknown>, abortSignal?: AbortSignal) =>
-    axios.put<T>(url, body, { signal: abortSignal }).then(responseBody),
-  del: <T>(url: string, abortSignal?: AbortSignal) =>
-    axios.delete<T>(url, { signal: abortSignal }).then(responseBody),
+  get: async <T>(url: string, abortSignal?: AbortSignal) =>
+    await axios.get<T>(url, { signal: abortSignal }).then(responseBody),
+  post: async <T>(
+    url: string,
+    body: Record<string, unknown>,
+    abortSignal?: AbortSignal
+  ) => await axios.post<T>(url, body, { signal: abortSignal }).then(responseBody),
+  put: async <T>(url: string, body: Record<string, unknown>, abortSignal?: AbortSignal) =>
+    await axios.put<T>(url, body, { signal: abortSignal }).then(responseBody),
+  del: async <T>(url: string, abortSignal?: AbortSignal) =>
+    await axios.delete<T>(url, { signal: abortSignal }).then(responseBody),
 }
 
 const Activities = {
-  list: (abortSignal?: AbortSignal) =>
-    requests.get<Activity[]>('/activities', abortSignal),
-  details: (id: string, abortSignal?: AbortSignal) =>
-    requests.get<Activity>(`/activities/${id}`, abortSignal),
-  create: (activity: Activity, abortSignal?: AbortSignal) =>
-    requests.post<void>('/activities', activity, abortSignal),
-  update: (activity: Activity, abortSignal?: AbortSignal) =>
-    requests.put<void>(`/activities/${activity.id}`, activity, abortSignal),
-  delete: (id: string, abortSignal?: AbortSignal) =>
-    requests.del<void>(`/activities/${id}`, abortSignal),
+  list: async (abortSignal?: AbortSignal) =>
+    await requests.get<Activity[]>('/activities', abortSignal),
+  details: async (id: string, abortSignal?: AbortSignal) =>
+    await requests.get<Activity>(`/activities/${id}`, abortSignal),
+  create: async (activity: Activity, abortSignal?: AbortSignal) =>
+    await requests.post<undefined>('/activities', activity, abortSignal),
+  update: async (activity: Activity, abortSignal?: AbortSignal) =>
+    await requests.put<undefined>(`/activities/${activity.id}`, activity, abortSignal),
+  delete: async (id: string, abortSignal?: AbortSignal) =>
+    await requests.del<undefined>(`/activities/${id}`, abortSignal),
 }
 
 const api = {

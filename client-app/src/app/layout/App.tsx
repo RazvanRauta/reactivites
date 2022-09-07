@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom'
 import ActivityDashboard from '@/features/activities/dashboard/ActivityDashboard'
 import ActivityDetails from '@/features/activities/details/ActivityDetails'
 import ActivityForm from '@/features/activities/form/ActivityForm'
+import TestErrors from '@/features/errors/TestError'
 import HomePage from '@/features/home/HomePage'
 
 import Layout from './Layout'
@@ -18,6 +19,7 @@ function App() {
         {['createActivity', 'manage/:id'].map((path) => (
           <Route path={path} element={<ActivityForm />} key={path} />
         ))}
+        <Route path="errors" element={<TestErrors />} />
         <Route path="*" element={<p>There&apos;s nothing here: 404!</p>} />
       </Route>
     </Routes>

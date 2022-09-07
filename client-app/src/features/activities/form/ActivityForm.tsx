@@ -5,6 +5,7 @@ import { Button, Form, Segment } from 'semantic-ui-react'
 import { v4 as uuid } from 'uuid'
 
 import Loader from '@/app/layout/Loader'
+import { Activity } from '@/app/models/activity'
 import { useStore } from '@/app/stores'
 
 export default observer(function ActivityForm() {
@@ -30,18 +31,22 @@ export default observer(function ActivityForm() {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const [activity, setActivity] = useState(initialState)
+  const [activity, setActivity] = useState<Activity>(initialState)
 
   const handleSubmit = useCallback(() => {
-    if (activity.id.length) {
-      updateActivity(activity).then(() => {
-        navigate(`/activities/${activity.id}`)
-      })
+    if (activity?.id?.length > 0) {
+      updateActivity(activity)
+        .then(() => {
+          navigate(`/activities/${activity.id}`)
+        })
+        .catch((e) => console.error(e))
     } else {
       const newActivity = { ...activity, id: uuid() }
-      createActivity(newActivity).then(() => {
-        navigate(`/activities/${newActivity.id}`)
-      })
+      createActivity(newActivity)
+        .then(() => {
+          navigate(`/activities/${newActivity.id}`)
+        })
+        .catch((e) => console.error(e))
     }
   }, [activity])
 
@@ -57,10 +62,12 @@ export default observer(function ActivityForm() {
     const controller = new AbortController()
     let ignore = false
 
-    if (id)
-      loadActivity(id, controller.signal).then((act) => {
-        if (!ignore) setActivity(act ?? initialState)
-      })
+    if (Boolean(id) && id != null)
+      loadActivity(id, controller.signal)
+        .then((act) => {
+          if (!ignore) setActivity(act ?? initialState)
+        })
+        .catch((e) => console.error(e))
     else setActivity(initialState)
 
     return () => {
@@ -69,7 +76,7 @@ export default observer(function ActivityForm() {
     }
   }, [id, loadActivity])
 
-  if (loadingInitial || !activity) {
+  if (loadingInitial || activity == null) {
     return <Loader />
   }
 

@@ -29,12 +29,14 @@ export default class ActivityStore {
 
   get groupedActivities() {
     return Object.entries(
-      this.activitiesByDate.reduce((activities, activity) => {
+      this.activitiesByDate.reduce<Record<string, Activity[]>>((activities, activity) => {
         const { date } = activity
         // eslint-disable-next-line no-param-reassign
-        activities[date] = activities[date] ? [...activities[date], activity] : [activity]
+        activities[date] = Boolean(activities?.date)
+          ? [...activities[date], activity]
+          : [activity]
         return activities
-      }, {} as Record<string, Activity[]>)
+      }, {})
     )
   }
 
@@ -61,7 +63,7 @@ export default class ActivityStore {
   loadActivity = async (id: string, abortSignal?: AbortSignal) => {
     let activity = this.getActivity(id)
 
-    if (activity) {
+    if (activity != null) {
       this.selectedActivity = activity
     } else {
       this.loadingInitial = true
@@ -69,7 +71,7 @@ export default class ActivityStore {
       try {
         activity = await api.Activities.details(id, abortSignal)
         runInAction(() => {
-          if (activity) {
+          if (activity != null) {
             activity = this.setActivity(activity)
             this.selectedActivity = activity
           }
@@ -85,11 +87,11 @@ export default class ActivityStore {
     return activity
   }
 
-  private getActivity = (id: string) => {
+  private readonly getActivity = (id: string) => {
     return this.activityRegistry.get(id)
   }
 
-  private setActivity = (activity: Activity) => {
+  private readonly setActivity = (activity: Activity) => {
     const formattedActivity = {
       ...activity,
       date: activity.date.split('T')[0],

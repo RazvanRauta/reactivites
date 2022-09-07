@@ -20,14 +20,15 @@ export default observer(function ActivityDetails() {
 
   useEffect(() => {
     const controller = new AbortController()
-    if (id) loadActivity(id, controller.signal)
+    if (Boolean(id) && id != null)
+      loadActivity(id, controller.signal).catch((e) => console.error(e))
 
     return () => {
       controller.abort()
     }
   }, [id, loadActivity])
 
-  if (loadingInitial || !selectedActivity) {
+  if (loadingInitial || selectedActivity == null) {
     return <Loader />
   }
 

@@ -18,7 +18,8 @@ export default observer(function ActivityDashboard() {
 
   useEffect(() => {
     const controller = new AbortController()
-    if (activityRegistry.size <= 1) loadActivities(controller.signal)
+    if (activityRegistry.size <= 1)
+      loadActivities(controller.signal).catch((e) => console.error(e))
 
     return () => {
       controller.abort()

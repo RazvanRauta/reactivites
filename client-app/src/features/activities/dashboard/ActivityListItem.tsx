@@ -5,7 +5,7 @@ import { Button, Icon, Item, Segment } from 'semantic-ui-react'
 
 import { Activity } from '@/app/models/activity'
 
-type ActivityListItemProps = {
+interface ActivityListItemProps {
   activity: Activity
 }
 

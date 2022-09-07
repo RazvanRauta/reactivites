@@ -6,10 +6,9 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
-    'airbnb',
     'plugin:jsx-a11y/recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
+    'standard-with-typescript',
     'plugin:prettier/recommended',
   ],
   parser: '@typescript-eslint/parser',
@@ -19,6 +18,7 @@ module.exports = {
     },
     ecmaVersion: 'latest',
     sourceType: 'module',
+    project: ['tsconfig.json'],
   },
   settings: {
     react: {
@@ -54,6 +54,7 @@ module.exports = {
     ],
     'no-console': ['error', { allow: ['error'] }],
     'no-shadow': 'off',
+    'no-extra-boolean-cast': 'off',
     '@typescript-eslint/no-shadow': 'error',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': [
